@@ -12,7 +12,6 @@ const handler = NextAuth({
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, account }) {
-      // Save the Cognito id_token/access_token inside NextAuth JWT
       if (account) {
         (token as any).id_token = (account as any).id_token;
         (token as any).access_token = (account as any).access_token;
@@ -20,7 +19,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // Make token available server-side (we’ll use it in proxy)
       (session as any).id_token = (token as any).id_token;
       return session;
     },

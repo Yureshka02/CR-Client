@@ -3,8 +3,8 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-export default function Home() {
-  const { data: session, status } = useSession();
+export default function Page() {
+  const { status } = useSession();
   const [ordersResp, setOrdersResp] = useState<any>(null);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function Home() {
         </>
       )}
 
-      <h2>/orders via proxy</h2>
+      <h2>/orders (protected)</h2>
       <pre style={{ whiteSpace: "pre-wrap" }}>
         {JSON.stringify(ordersResp, null, 2)}
       </pre>

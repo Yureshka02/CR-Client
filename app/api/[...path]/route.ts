@@ -14,12 +14,10 @@ async function forward(req: Request, targetBase: string) {
   const pathParts = url.pathname.replace(/^\/api\//, "").split("/");
   const upstream = join(targetBase, pathParts);
 
-  // Clone headers
   const headers = new Headers(req.headers);
   headers.delete("host");
 
-  // Attach Bearer token automatically (if user is logged in)
-  // Works on Vercel because getToken reads NextAuth cookies.
+  // If user is logged in, attach Cognito id_token for API Gateway JWT authorizer
   const token = await getToken({
     req: req as any,
     secret: process.env.NEXTAUTH_SECRET,
@@ -29,7 +27,6 @@ async function forward(req: Request, targetBase: string) {
   if (idToken) {
     headers.set("Authorization", `Bearer ${idToken}`);
   } else {
-    // If no token, ensure we don't accidentally send an empty Authorization header
     headers.delete("Authorization");
   }
 
@@ -46,13 +43,11 @@ async function forward(req: Request, targetBase: string) {
 async function handler(req: Request) {
   try {
     const r1 = await forward(req, PRIMARY);
-
-    // Don't failover on 4xx (auth/validation errors)
     if (r1.ok || (r1.status >= 400 && r1.status < 500)) {
       return new NextResponse(await r1.text(), { status: r1.status, headers: r1.headers });
     }
   } catch {
-    // network error => failover
+    // network error → failover
   }
 
   const r2 = await forward(req, SECONDARY);
