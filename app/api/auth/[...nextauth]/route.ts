@@ -3,11 +3,15 @@ import CognitoProvider from "next-auth/providers/cognito";
 
 const handler = NextAuth({
   providers: [
-    CognitoProvider({
-      clientId: process.env.COGNITO_CLIENT_ID!,
-      clientSecret: process.env.COGNITO_CLIENT_SECRET || "",
-      issuer: process.env.COGNITO_ISSUER!,
-    }),
+   CognitoProvider({
+  clientId: process.env.COGNITO_CLIENT_ID!,
+  clientSecret: process.env.COGNITO_CLIENT_SECRET || "", 
+  issuer: process.env.COGNITO_ISSUER!,
+  client: {
+    // This tells NextAuth not to send a secret in the body/header
+    token_endpoint_auth_method: "none", 
+  },
+}),
   ],
   session: { strategy: "jwt" },
   callbacks: {
