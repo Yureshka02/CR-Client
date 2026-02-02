@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 const PRIMARY = process.env.API_BASE_URL_PRIMARY!;
 const SECONDARY = process.env.API_BASE_URL_SECONDARY!;
@@ -11,11 +12,26 @@ function join(base: string, pathParts: string[]) {
 async function forward(req: Request, targetBase: string) {
   const url = new URL(req.url);
   const pathParts = url.pathname.replace(/^\/api\//, "").split("/");
-
   const upstream = join(targetBase, pathParts);
 
+  // Clone headers
   const headers = new Headers(req.headers);
   headers.delete("host");
+
+  // Attach Bearer token automatically (if user is logged in)
+  // Works on Vercel because getToken reads NextAuth cookies.
+  const token = await getToken({
+    req: req as any,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
+  const idToken = (token as any)?.id_token;
+  if (idToken) {
+    headers.set("Authorization", `Bearer ${idToken}`);
+  } else {
+    // If no token, ensure we don't accidentally send an empty Authorization header
+    headers.delete("Authorization");
+  }
 
   const init: RequestInit = {
     method: req.method,
@@ -28,7 +44,6 @@ async function forward(req: Request, targetBase: string) {
 }
 
 async function handler(req: Request) {
-  // Try primary
   try {
     const r1 = await forward(req, PRIMARY);
 
@@ -40,7 +55,6 @@ async function handler(req: Request) {
     // network error => failover
   }
 
-  // Try secondary
   const r2 = await forward(req, SECONDARY);
   return new NextResponse(await r2.text(), { status: r2.status, headers: r2.headers });
 }

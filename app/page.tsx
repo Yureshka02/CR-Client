@@ -1,54 +1,40 @@
 "use client";
 
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
-async function fetchJson(path: string) {
-  const res = await fetch(path, { cache: "no-store" });
-  const text = await res.text();
-
-  try {
-    return { ok: true, status: res.status, data: JSON.parse(text) };
-  } catch {
-    // If backend returned HTML/error text, show it
-    return { ok: false, status: res.status, text };
-  }
-}
-
 export default function Home() {
-  const [catalog, setCatalog] = useState<any>(null);
-  const [inventory, setInventory] = useState<any>(null);
-  const [orders, setOrders] = useState<any>(null);
+  const { data: session, status } = useSession();
+  const [ordersResp, setOrdersResp] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
-      // IMPORTANT: match your current endpoints:
-      // catalog has /health, inventory & orders do NOT
-      const c = await fetchJson("/api/health");
-      const i = await fetchJson("/api/inventory");
-      const o = await fetchJson("/api/orders");
-
-      setCatalog(c);
-      setInventory(i);
-      setOrders(o);
-    })().catch((e) => {
-      setCatalog({ ok: false, error: String(e) });
-      setInventory({ ok: false, error: String(e) });
-      setOrders({ ok: false, error: String(e) });
-    });
-  }, []);
+      const r = await fetch("/api/orders");
+      const t = await r.text();
+      setOrdersResp({ status: r.status, body: t });
+    })();
+  }, [status]);
 
   return (
-    <main style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h1>CloudRetail Frontend</h1>
+    <main style={{ padding: 24 }}>
+      <h1>CloudRetail</h1>
 
-      <h2>Catalog</h2>
-      <pre>{catalog ? JSON.stringify(catalog, null, 2) : "Loading..."}</pre>
+      {status === "authenticated" ? (
+        <>
+          <p>Logged in ✅</p>
+          <button onClick={() => signOut()}>Logout</button>
+        </>
+      ) : (
+        <>
+          <p>Not logged in</p>
+          <button onClick={() => signIn("cognito")}>Login</button>
+        </>
+      )}
 
-      <h2>Inventory</h2>
-      <pre>{inventory ? JSON.stringify(inventory, null, 2) : "Loading..."}</pre>
-
-      <h2>Orders</h2>
-      <pre>{orders ? JSON.stringify(orders, null, 2) : "Loading..."}</pre>
+      <h2>/orders via proxy</h2>
+      <pre style={{ whiteSpace: "pre-wrap" }}>
+        {JSON.stringify(ordersResp, null, 2)}
+      </pre>
     </main>
   );
 }
