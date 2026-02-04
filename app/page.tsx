@@ -2,6 +2,7 @@
 
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Page() {
   const { status } = useSession();
@@ -46,6 +47,18 @@ export default function Page() {
     transition: "opacity 0.2s"
   });
 
+  const linkButtonStyle: React.CSSProperties = {
+    display: "inline-block",
+    padding: "12px 24px",
+    borderRadius: "6px",
+    backgroundColor: "#10b981",
+    color: "white",
+    textDecoration: "none",
+    fontWeight: 600,
+    fontSize: "14px",
+    transition: "opacity 0.2s"
+  };
+
   const preStyle: React.CSSProperties = {
     backgroundColor: "#1f2937",
     color: "#10b981",
@@ -63,10 +76,24 @@ export default function Page() {
         <h1 style={{ fontSize: "2rem", fontWeight: 800, color: "#1e40af", margin: 0 }}>
           CloudRetail
         </h1>
+        <p style={{ color: "#6b7280", marginTop: "8px" }}>E-commerce Management Platform</p>
       </header>
 
+      {/* Navigation Card */}
       <section style={cardStyle}>
-        <div style={{ display: "flex", justifyContent: "between", alignItems: "center", width: "100%" }}>
+        <h2 style={{ fontSize: "1.25rem", marginBottom: "16px", color: "#374151" }}>Quick Actions</h2>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <Link href="/inventory" style={linkButtonStyle}>
+            📦 Manage Inventory
+          </Link>
+          <Link href="/orders" style={{...linkButtonStyle, backgroundColor: "#8b5cf6"}}>
+            🛒 View Orders
+          </Link>
+        </div>
+      </section>
+
+      <section style={cardStyle}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
           <div style={{ flexGrow: 1 }}>
             <h2 style={{ margin: "0 0 8px 0", fontSize: "1.25rem" }}>Session Status</h2>
             {status === "authenticated" ? (
