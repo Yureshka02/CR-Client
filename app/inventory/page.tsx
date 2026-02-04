@@ -47,11 +47,10 @@ export default function InventoryPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(`✅ Item ${data.sku} created successfully!`);
+        alert(`✓ Item ${data.sku} created`);
         setSku('');
         setStock('');
         setPrice('');
-        // Refresh the item if we're viewing it
         if (searchSku === sku) {
           await fetchItem(sku);
         }
@@ -120,8 +119,7 @@ export default function InventoryPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(`✅ Reserved ${qty} units of ${itemSku}`);
-        // Refresh the item
+        alert(`✓ Reserved ${qty} units`);
         await fetchItem(itemSku);
       } else {
         setError(data.message || 'Failed to reserve stock');
@@ -134,193 +132,169 @@ export default function InventoryPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-white p-8">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            📦 Inventory Management System
+        <div className="mb-12 border-b border-gray-200 pb-6">
+          <h1 className="text-3xl font-light text-gray-900 tracking-tight">
+            Inventory
           </h1>
-          <p className="text-gray-600">
-            Create, search, and manage your inventory items
+          <p className="text-sm text-gray-500 mt-1">
+            Manage stock and items
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-12">
           {/* Create Item Form */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
-              <span className="text-3xl mr-2">➕</span>
-              Create New Item
+          <div>
+            <h2 className="text-lg font-medium text-gray-900 mb-6">
+              Create Item
             </h2>
             
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  SKU * <span className="text-xs text-gray-500">(Unique identifier)</span>
+                <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2">
+                  SKU
                 </label>
                 <input
                   type="text"
                   value={sku}
                   onChange={(e) => setSku(e.target.value.toUpperCase())}
-                  placeholder="e.g., LAPTOP-001"
+                  placeholder="LAPTOP-001"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-gray-900 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stock Quantity *
+                <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2">
+                  Stock
                 </label>
                 <input
                   type="number"
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
-                  placeholder="e.g., 100"
+                  placeholder="100"
                   required
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-gray-900 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price (USD) <span className="text-xs text-gray-500">(Optional)</span>
+                <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2">
+                  Price
                 </label>
                 <input
                   type="number"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  placeholder="e.g., 999.99"
+                  placeholder="999.99"
                   step="0.01"
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-gray-900 transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors shadow-md hover:shadow-lg"
+                className="w-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
               >
-                {loading ? '⏳ Creating...' : '✨ Create Item'}
+                {loading ? 'Creating...' : 'Create'}
               </button>
             </form>
           </div>
 
           {/* Search & View Items */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
-              <span className="text-3xl mr-2">🔍</span>
+          <div>
+            <h2 className="text-lg font-medium text-gray-900 mb-6">
               Search Item
             </h2>
             
-            <form onSubmit={handleSearch} className="space-y-4 mb-6">
+            <form onSubmit={handleSearch} className="space-y-5 mb-8">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Enter SKU to Search
+                <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2">
+                  SKU
                 </label>
                 <input
                   type="text"
                   value={searchSku}
                   onChange={(e) => setSearchSku(e.target.value.toUpperCase())}
-                  placeholder="e.g., LAPTOP-001"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                  placeholder="LAPTOP-001"
+                  className="w-full px-3 py-2 border border-gray-300 text-gray-900 text-sm focus:outline-none focus:border-gray-900 transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading || !searchSku}
-                className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 transition-colors shadow-md hover:shadow-lg"
+                className="w-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
               >
-                {loading ? '⏳ Searching...' : '🔎 Search'}
+                {loading ? 'Searching...' : 'Search'}
               </button>
             </form>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-4">
-                <p className="font-semibold">Error</p>
-                <p className="text-sm">{error}</p>
+              <div className="border-l-2 border-red-500 bg-red-50 px-4 py-3 mb-6">
+                <p className="text-xs text-red-800">{error}</p>
               </div>
             )}
 
             {/* Display Items */}
             {items.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                  Search Results
-                </h3>
+              <div className="space-y-6">
                 {items.map((item) => (
                   <div
                     key={item.sku}
-                    className="border-2 border-gray-200 rounded-lg p-5 bg-gradient-to-br from-white to-gray-50 hover:shadow-lg transition-shadow"
+                    className="border border-gray-200 p-5"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-800">
+                        <h3 className="text-base font-medium text-gray-900">
                           {item.sku}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
                           {item.updatedAt && (
                             <>
-                              Last updated: {new Date(item.updatedAt).toLocaleDateString()} at{' '}
-                              {new Date(item.updatedAt).toLocaleTimeString()}
+                              {new Date(item.updatedAt).toLocaleDateString()}
                             </>
                           )}
                         </p>
                       </div>
-                      <span
-                        className={`px-4 py-2 rounded-full text-sm font-bold shadow-md ${
-                          item.stock > 50
-                            ? 'bg-green-100 text-green-800 border-2 border-green-300'
-                            : item.stock > 10
-                            ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300'
-                            : 'bg-red-100 text-red-800 border-2 border-red-300'
-                        }`}
-                      >
-                        {item.stock} in stock
+                      <span className="text-xs font-medium text-gray-600">
+                        {item.stock} units
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4 bg-gray-100 p-4 rounded-lg">
-                      <div>
-                        <p className="text-xs text-gray-600 uppercase font-semibold">Stock Level</p>
-                        <p className="text-2xl font-bold text-gray-800 mt-1">
-                          {item.stock} units
+                    {item.price && (
+                      <div className="mb-4">
+                        <p className="text-2xl font-light text-gray-900">
+                          ${item.price.toFixed(2)}
                         </p>
                       </div>
-                      {item.price && (
-                        <div>
-                          <p className="text-xs text-gray-600 uppercase font-semibold">Unit Price</p>
-                          <p className="text-2xl font-bold text-gray-800 mt-1">
-                            ${item.price.toFixed(2)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    )}
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => handleReserve(item.sku, 1)}
                         disabled={loading || item.stock === 0}
-                        className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 disabled:bg-gray-400 transition-colors shadow-md"
+                        className="flex-1 border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
                       >
                         Reserve 1
                       </button>
                       <button
                         onClick={() => handleReserve(item.sku, 5)}
                         disabled={loading || item.stock < 5}
-                        className="flex-1 bg-orange-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-700 disabled:bg-gray-400 transition-colors shadow-md"
+                        className="flex-1 border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
                       >
                         Reserve 5
                       </button>
                       <button
                         onClick={() => handleReserve(item.sku, 10)}
                         disabled={loading || item.stock < 10}
-                        className="flex-1 bg-orange-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-800 disabled:bg-gray-400 transition-colors shadow-md"
+                        className="flex-1 border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
                       >
                         Reserve 10
                       </button>
@@ -331,34 +305,32 @@ export default function InventoryPage() {
             )}
 
             {items.length === 0 && !error && !loading && (
-              <div className="text-center py-8 text-gray-400">
-                <p className="text-4xl mb-2">📭</p>
-                <p>No items found. Search for an SKU above.</p>
+              <div className="text-center py-12 text-gray-400">
+                <p className="text-sm">No items found</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Quick Stats & Test Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
-            <span className="text-3xl mr-2">🧪</span>
-            Quick API Tests
+        <div className="mt-16 pt-8 border-t border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900 mb-6">
+            API Tests
           </h2>
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-4 gap-3">
             <button
               onClick={async () => {
                 try {
                   const response = await fetch(`${API_URL}/inventory/health`);
                   const data = await response.json();
-                  alert('✅ Health Check:\n\n' + JSON.stringify(data, null, 2));
+                  alert('✓ Health Check:\n\n' + JSON.stringify(data, null, 2));
                 } catch (err) {
-                  alert('❌ Error: ' + err);
+                  alert('✗ Error: ' + err);
                 }
               }}
-              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+              className="border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 transition-colors"
             >
-              🏥 Health Check
+              Health
             </button>
             <button
               onClick={async () => {
@@ -369,38 +341,38 @@ export default function InventoryPage() {
                     body: JSON.stringify({ test: 'ping' }),
                   });
                   const data = await response.json();
-                  alert('✅ Ping Response:\n\n' + JSON.stringify(data, null, 2));
+                  alert('✓ Ping:\n\n' + JSON.stringify(data, null, 2));
                 } catch (err) {
-                  alert('❌ Error: ' + err);
+                  alert('✗ Error: ' + err);
                 }
               }}
-              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+              className="border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 transition-colors"
             >
-              📡 Test Ping
+              Ping
             </button>
             <button
               onClick={() => {
                 window.open(`${API_URL}/inventory/health`, '_blank');
               }}
-              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+              className="border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 transition-colors"
             >
-              🌐 Open API
+              Open API
             </button>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(API_URL);
-                alert('✅ API URL copied to clipboard!');
+                alert('✓ Copied');
               }}
-              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+              className="border border-gray-300 text-gray-900 py-2 text-xs font-medium hover:bg-gray-50 transition-colors"
             >
-              📋 Copy API URL
+              Copy URL
             </button>
           </div>
         </div>
 
         {/* Footer Info */}
-        <div className="mt-8 text-center text-gray-500 text-sm">
-          <p>API Endpoint: <code className="bg-gray-200 px-2 py-1 rounded">{API_URL}</code></p>
+        <div className="mt-8 text-center text-xs text-gray-400">
+          <p>{API_URL}</p>
         </div>
       </div>
     </main>
