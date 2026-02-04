@@ -51,6 +51,7 @@ export default function InventoryPage() {
         setSku('');
         setStock('');
         setPrice('');
+        // Refresh the item if we're viewing it
         if (searchSku === sku) {
           await fetchItem(sku);
         }
@@ -120,6 +121,7 @@ export default function InventoryPage() {
 
       if (response.ok) {
         alert(`✅ Reserved ${qty} units of ${itemSku}`);
+        // Refresh the item
         await fetchItem(itemSku);
       } else {
         setError(data.message || 'Failed to reserve stock');
@@ -132,46 +134,30 @@ export default function InventoryPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">
-                Inventory Management
-              </h1>
-              <p className="text-slate-600 mt-1">
-                Manage your products and stock levels
-              </p>
-            </div>
-          </div>
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            📦 Inventory Management System
+          </h1>
+          <p className="text-gray-600">
+            Create, search, and manage your inventory items
+          </p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Create Item Card */}
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Create New Item
-              </h2>
-              <p className="text-blue-100 text-sm mt-1">Add products to your inventory</p>
-            </div>
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Create Item Form */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+              <span className="text-3xl mr-2">➕</span>
+              Create New Item
+            </h2>
             
-            <form onSubmit={handleCreate} className="p-8 space-y-6">
+            <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Product SKU
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  SKU * <span className="text-xs text-gray-500">(Unique identifier)</span>
                 </label>
                 <input
                   type="text"
@@ -179,220 +165,187 @@ export default function InventoryPage() {
                   onChange={(e) => setSku(e.target.value.toUpperCase())}
                   placeholder="e.g., LAPTOP-001"
                   required
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Stock Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    placeholder="100"
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock Quantity *
+                </label>
+                <input
+                  type="number"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="e.g., 100"
+                  required
+                  min="0"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Price (USD)
-                  </label>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="999.99"
-                    step="0.01"
-                    min="0"
-                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price (USD) <span className="text-xs text-gray-500">(Optional)</span>
+                </label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="e.g., 999.99"
+                  step="0.01"
+                  min="0"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 transition-colors shadow-md hover:shadow-lg"
               >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Create Item
-                  </>
-                )}
+                {loading ? '⏳ Creating...' : '✨ Create Item'}
               </button>
             </form>
           </div>
 
-          {/* Search & View Card */}
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Search Inventory
-              </h2>
-              <p className="text-emerald-100 text-sm mt-1">Find products by SKU</p>
-            </div>
+          {/* Search & View Items */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+              <span className="text-3xl mr-2">🔍</span>
+              Search Item
+            </h2>
             
-            <div className="p-8">
-              <form onSubmit={handleSearch} className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Enter SKU
-                  </label>
-                  <input
-                    type="text"
-                    value={searchSku}
-                    onChange={(e) => setSearchSku(e.target.value.toUpperCase())}
-                    placeholder="e.g., LAPTOP-001"
-                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all outline-none"
-                  />
-                </div>
+            <form onSubmit={handleSearch} className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter SKU to Search
+                </label>
+                <input
+                  type="text"
+                  value={searchSku}
+                  onChange={(e) => setSearchSku(e.target.value.toUpperCase())}
+                  placeholder="e.g., LAPTOP-001"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                />
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || !searchSku}
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  {loading ? 'Searching...' : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      Search
-                    </>
-                  )}
-                </button>
-              </form>
+              <button
+                type="submit"
+                disabled={loading || !searchSku}
+                className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 transition-colors shadow-md hover:shadow-lg"
+              >
+                {loading ? '⏳ Searching...' : '🔎 Search'}
+              </button>
+            </form>
 
-              {/* Error Message */}
-              {error && (
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl mb-6">
-                  <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    <div>
-                      <p className="font-semibold text-red-900 text-sm">Error</p>
-                      <p className="text-red-700 text-sm mt-1">{error}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-4">
+                <p className="font-semibold">Error</p>
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
 
-              {/* Display Items */}
-              {items.length > 0 && (
-                <div className="space-y-4">
-                  {items.map((item) => (
-                    <div
-                      key={item.sku}
-                      className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border-2 border-slate-200 hover:border-blue-300 transition-all"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-slate-900">
-                            {item.sku}
-                          </h3>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {item.updatedAt && (
-                              <>Updated {new Date(item.updatedAt).toLocaleString()}</>
-                            )}
-                          </p>
-                        </div>
-                        <span
-                          className={`px-4 py-2 rounded-full text-sm font-bold ${
-                            item.stock > 50
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : item.stock > 10
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-rose-100 text-rose-800'
-                          }`}
-                        >
-                          {item.stock} units
-                        </span>
+            {/* Display Items */}
+            {items.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-700 mb-3">
+                  Search Results
+                </h3>
+                {items.map((item) => (
+                  <div
+                    key={item.sku}
+                    className="border-2 border-gray-200 rounded-lg p-5 bg-gradient-to-br from-white to-gray-50 hover:shadow-lg transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800">
+                          {item.sku}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {item.updatedAt && (
+                            <>
+                              Last updated: {new Date(item.updatedAt).toLocaleDateString()} at{' '}
+                              {new Date(item.updatedAt).toLocaleTimeString()}
+                            </>
+                          )}
+                        </p>
                       </div>
+                      <span
+                        className={`px-4 py-2 rounded-full text-sm font-bold shadow-md ${
+                          item.stock > 50
+                            ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                            : item.stock > 10
+                            ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300'
+                            : 'bg-red-100 text-red-800 border-2 border-red-300'
+                        }`}
+                      >
+                        {item.stock} in stock
+                      </span>
+                    </div>
 
+                    <div className="grid grid-cols-2 gap-4 mb-4 bg-gray-100 p-4 rounded-lg">
+                      <div>
+                        <p className="text-xs text-gray-600 uppercase font-semibold">Stock Level</p>
+                        <p className="text-2xl font-bold text-gray-800 mt-1">
+                          {item.stock} units
+                        </p>
+                      </div>
                       {item.price && (
-                        <div className="mb-4 bg-white rounded-lg p-4 border border-slate-200">
-                          <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide mb-1">Price</p>
-                          <p className="text-3xl font-bold text-slate-900">
+                        <div>
+                          <p className="text-xs text-gray-600 uppercase font-semibold">Unit Price</p>
+                          <p className="text-2xl font-bold text-gray-800 mt-1">
                             ${item.price.toFixed(2)}
                           </p>
                         </div>
                       )}
-
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          onClick={() => handleReserve(item.sku, 1)}
-                          disabled={loading || item.stock === 0}
-                          className="bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-blue-400 text-slate-700 font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                        >
-                          Reserve 1
-                        </button>
-                        <button
-                          onClick={() => handleReserve(item.sku, 5)}
-                          disabled={loading || item.stock < 5}
-                          className="bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-blue-400 text-slate-700 font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                        >
-                          Reserve 5
-                        </button>
-                        <button
-                          onClick={() => handleReserve(item.sku, 10)}
-                          disabled={loading || item.stock < 10}
-                          className="bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-blue-400 text-slate-700 font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                        >
-                          Reserve 10
-                        </button>
-                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
 
-              {items.length === 0 && !error && !loading && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleReserve(item.sku, 1)}
+                        disabled={loading || item.stock === 0}
+                        className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 disabled:bg-gray-400 transition-colors shadow-md"
+                      >
+                        Reserve 1
+                      </button>
+                      <button
+                        onClick={() => handleReserve(item.sku, 5)}
+                        disabled={loading || item.stock < 5}
+                        className="flex-1 bg-orange-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-700 disabled:bg-gray-400 transition-colors shadow-md"
+                      >
+                        Reserve 5
+                      </button>
+                      <button
+                        onClick={() => handleReserve(item.sku, 10)}
+                        disabled={loading || item.stock < 10}
+                        className="flex-1 bg-orange-700 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-800 disabled:bg-gray-400 transition-colors shadow-md"
+                      >
+                        Reserve 10
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-slate-600 font-medium">No items found</p>
-                  <p className="text-slate-500 text-sm mt-1">Search for a SKU to get started</p>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {items.length === 0 && !error && !loading && (
+              <div className="text-center py-8 text-gray-400">
+                <p className="text-4xl mb-2">📭</p>
+                <p>No items found. Search for an SKU above.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* API Tests Section */}
-        <div className="mt-8 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4">
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              API Testing
-            </h2>
-          </div>
-          <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Quick Stats & Test Section */}
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center">
+            <span className="text-3xl mr-2">🧪</span>
+            Quick API Tests
+          </h2>
+          <div className="grid md:grid-cols-4 gap-4">
             <button
               onClick={async () => {
                 try {
@@ -403,9 +356,9 @@ export default function InventoryPage() {
                   alert('❌ Error: ' + err);
                 }
               }}
-              className="bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-purple-400 text-slate-700 font-semibold py-3 rounded-xl transition-all text-sm"
+              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
             >
-              🏥 Health
+              🏥 Health Check
             </button>
             <button
               onClick={async () => {
@@ -416,31 +369,38 @@ export default function InventoryPage() {
                     body: JSON.stringify({ test: 'ping' }),
                   });
                   const data = await response.json();
-                  alert('✅ Ping:\n\n' + JSON.stringify(data, null, 2));
+                  alert('✅ Ping Response:\n\n' + JSON.stringify(data, null, 2));
                 } catch (err) {
                   alert('❌ Error: ' + err);
                 }
               }}
-              className="bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-purple-400 text-slate-700 font-semibold py-3 rounded-xl transition-all text-sm"
+              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
             >
-              📡 Ping
+              📡 Test Ping
             </button>
             <button
-              onClick={() => window.open(`${API_URL}/inventory/health`, '_blank')}
-              className="bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-purple-400 text-slate-700 font-semibold py-3 rounded-xl transition-all text-sm"
+              onClick={() => {
+                window.open(`${API_URL}/inventory/health`, '_blank');
+              }}
+              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
             >
-              🌐 Open
+              🌐 Open API
             </button>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(API_URL);
-                alert('✅ Copied!');
+                alert('✅ API URL copied to clipboard!');
               }}
-              className="bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-purple-400 text-slate-700 font-semibold py-3 rounded-xl transition-all text-sm"
+              className="bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
             >
-              📋 Copy
+              📋 Copy API URL
             </button>
           </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="mt-8 text-center text-gray-500 text-sm">
+          <p>API Endpoint: <code className="bg-gray-200 px-2 py-1 rounded">{API_URL}</code></p>
         </div>
       </div>
     </main>
