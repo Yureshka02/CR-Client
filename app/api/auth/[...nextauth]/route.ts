@@ -8,7 +8,7 @@ const handler = NextAuth({
   clientSecret: process.env.COGNITO_CLIENT_SECRET || "", 
   issuer: process.env.COGNITO_ISSUER!,
   client: {
-    // This tells NextAuth not to send a secret in the body/header
+    
     token_endpoint_auth_method: "none", 
   },
 }),
