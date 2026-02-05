@@ -1,8 +1,11 @@
-"use client";
+'use client';
 
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
+// Use API Gateway for both
+const API_URL = 'https://re46x5il6j.execute-api.us-east-1.amazonaws.com';
 
 type AvailableItem = {
   sku: string;
@@ -19,7 +22,7 @@ type OrderPayload = {
 };
 
 export default function Page() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
 
   // ---- state ----
   const [ordersResp, setOrdersResp] = useState<any>(null);
@@ -39,37 +42,52 @@ export default function Page() {
 
   // ---- fetch helpers ----
   async function fetchOrders() {
-    const r = await fetch("/api/orders/list", { cache: "no-store" });
-    const t = await r.text();
-    setOrdersResp({ status: r.status, body: safeJson(t) ?? t });
+    try {
+      const idToken = (session as any)?.id_token;
+      const headers: Record<string, string> = idToken 
+        ? { 'Authorization': `Bearer ${idToken}` }
+        : {};
+      
+      const r = await fetch(`${API_URL}/orders/list`, { 
+        cache: "no-store",
+        headers,
+      });
+      const t = await r.text();
+      setOrdersResp({ status: r.status, body: safeJson(t) ?? t });
+    } catch (e) {
+      setOrdersResp({ status: "ERR", body: String(e) });
+    }
   }
 
   async function fetchAvailable() {
-    // expects your inventory service exposes /inventory/available
-    const r = await fetch("/api/inventory/available", { cache: "no-store" });
-    const t = await r.text();
-    const j = safeJson(t);
-    setAvailableResp({ status: r.status, body: j ?? t });
+    try {
+      const r = await fetch(`${API_URL}/inventory/available`, { cache: "no-store" });
+      const t = await r.text();
+      const j = safeJson(t);
+      setAvailableResp({ status: r.status, body: j ?? t });
 
-    if (r.ok && Array.isArray(j)) {
-      setAvailableItems(j);
-      if (!selectedSku && j[0]?.sku) setSelectedSku(j[0].sku);
+      if (r.ok && Array.isArray(j)) {
+        setAvailableItems(j);
+        if (!selectedSku && j[0]?.sku) setSelectedSku(j[0].sku);
+      }
+    } catch (e) {
+      setAvailableResp({ status: "ERR", body: String(e) });
     }
   }
 
   // initial loads
   useEffect(() => {
-    fetchAvailable().catch((e) => setAvailableResp({ status: "ERR", body: String(e) }));
+    fetchAvailable();
   }, []);
 
   useEffect(() => {
     // only fetch orders when auth state is known
     if (status === "authenticated") {
-      fetchOrders().catch((e) => setOrdersResp({ status: "ERR", body: String(e) }));
+      fetchOrders();
     } else if (status === "unauthenticated") {
       setOrdersResp({ status: 401, body: "Login required to view /orders" });
     }
-  }, [status]);
+  }, [status, session]);
 
   const selectedItem = useMemo(
     () => availableItems.find((i) => i.sku === selectedSku),
@@ -101,9 +119,15 @@ export default function Page() {
     setPlaceResult(null);
 
     try {
-      const r = await fetch("/api/orders/create", {
+      const idToken = (session as any)?.id_token;
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+      };
+
+      const r = await fetch(`${API_URL}/orders/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -124,7 +148,7 @@ export default function Page() {
     }
   }
 
-  // ---- Modern Styling Constants (kept from your page) ----
+  // ---- Modern Styling Constants ----
   const containerStyle: React.CSSProperties = {
     padding: "40px 20px",
     maxWidth: "900px",
