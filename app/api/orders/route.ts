@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const bearer = idToken || accessToken!;
+  const bearer = accessToken || idToken!;
   const body = await req.text();
 
   const r = await fetch(upstreamUrl("/orders"), {
