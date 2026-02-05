@@ -7,64 +7,60 @@ function upstreamUrl(path: string) {
   return `${ORDERS_BASE.replace(/\/+$/, "")}${path}`;
 }
 
-async function getBearerToken(req: Request) {
-  const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET });
-  return (token as any)?.id_token || (token as any)?.access_token;
-}
+async function bearerFromSession(req: Request) {
+  const t = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET });
 
-async function fetchWithTimeout(input: RequestInfo, init: RequestInit, ms = 30000) {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), ms);
-  try {
-    return await fetch(input, { ...init, signal: controller.signal });
-  } finally {
-    clearTimeout(t);
-  }
-}
+  const idToken = (t as any)?.id_token as string | undefined;
+  const accessToken = (t as any)?.access_token as string | undefined;
 
-export async function POST(req: Request) {
-  const bearer = await getBearerToken(req);
-  if (!bearer) return NextResponse.json({ message: "Unauthorized (no session token)" }, { status: 401 });
-
-  const body = await req.text();
-
-  try {
-    const r = await fetchWithTimeout(upstreamUrl("/orders"), {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${bearer}`,
-        "Content-Type": "application/json",
-      },
-      body,
-    });
-
-    const text = await r.text();
-    return new NextResponse(text, { status: r.status, headers: r.headers });
-  } catch (e: any) {
-    return NextResponse.json(
-      { message: "Upstream request failed", error: String(e?.message ?? e), upstream: upstreamUrl("/orders") },
-      { status: 502 }
-    );
-  }
+  return { idToken, accessToken };
 }
 
 export async function GET(req: Request) {
-  const bearer = await getBearerToken(req);
-  if (!bearer) return NextResponse.json({ message: "Unauthorized (no session token)" }, { status: 401 });
+  const { idToken, accessToken } = await bearerFromSession(req);
 
-  try {
-    const r = await fetchWithTimeout(upstreamUrl("/orders"), {
-      method: "GET",
-      headers: { Authorization: `Bearer ${bearer}` },
-      cache: "no-store",
-    });
-
-    const text = await r.text();
-    return new NextResponse(text, { status: r.status, headers: r.headers });
-  } catch (e: any) {
+  if (!idToken && !accessToken) {
     return NextResponse.json(
-      { message: "Upstream request failed", error: String(e?.message ?? e), upstream: upstreamUrl("/orders") },
-      { status: 502 }
+      {
+        message: "No token found in NextAuth session cookie",
+        hint: "Check NEXTAUTH_URL/NEXTAUTH_SECRET, trustHost:true, and that login completed on this domain.",
+      },
+      { status: 401 }
     );
   }
+
+  const bearer = idToken || accessToken!;
+  const r = await fetch(upstreamUrl("/orders"), {
+    headers: { Authorization: `Bearer ${bearer}` },
+    cache: "no-store",
+  });
+
+  const text = await r.text();
+  return new NextResponse(text, { status: r.status, headers: r.headers });
+}
+
+export async function POST(req: Request) {
+  const { idToken, accessToken } = await bearerFromSession(req);
+
+  if (!idToken && !accessToken) {
+    return NextResponse.json(
+      { message: "No token found in session cookie" },
+      { status: 401 }
+    );
+  }
+
+  const bearer = idToken || accessToken!;
+  const body = await req.text();
+
+  const r = await fetch(upstreamUrl("/orders"), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${bearer}`,
+      "Content-Type": "application/json",
+    },
+    body,
+  });
+
+  const text = await r.text();
+  return new NextResponse(text, { status: r.status, headers: r.headers });
 }
