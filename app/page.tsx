@@ -39,7 +39,7 @@ export default function Page() {
 
   // ---- fetch helpers ----
   async function fetchOrders() {
-    const r = await fetch("/api/orders", { cache: "no-store" });
+    const r = await fetch("/api/orders/list", { cache: "no-store" });
     const t = await r.text();
     setOrdersResp({ status: r.status, body: safeJson(t) ?? t });
   }
@@ -101,7 +101,7 @@ export default function Page() {
     setPlaceResult(null);
 
     try {
-      const r = await fetch("/api/orders", {
+      const r = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -219,7 +219,7 @@ export default function Page() {
           <Link href="/inventory" style={linkButtonStyle}>
             📦 Manage Inventory
           </Link>
-          <Link href="/orders" style={{ ...linkButtonStyle, backgroundColor: "#8b5cf6" }}>
+          <Link href="/orders/list" style={{ ...linkButtonStyle, backgroundColor: "#8b5cf6" }}>
             🛒 View Orders
           </Link>
           <button style={secondaryBtn} onClick={() => fetchAvailable()}>
@@ -358,7 +358,7 @@ export default function Page() {
       {/* Orders */}
       <section style={cardStyle}>
         <h2 style={{ fontSize: "1.1rem", marginBottom: "16px", color: "#374151" }}>
-          🔒 Protected API: <code style={{ background: "#f3f4f6", padding: "2px 6px", borderRadius: "4px" }}>/orders</code>
+          🔒 Protected API: <code style={{ background: "#f3f4f6", padding: "2px 6px", borderRadius: "4px" }}>/orders/list</code>
         </h2>
         <pre style={preStyle}>{JSON.stringify(ordersResp, null, 2)}</pre>
       </section>
