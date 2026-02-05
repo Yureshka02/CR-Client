@@ -12,7 +12,7 @@ async function getBearerToken(req: Request) {
   return (token as any)?.id_token || (token as any)?.access_token;
 }
 
-async function fetchWithTimeout(input: RequestInfo, init: RequestInit, ms = 12000) {
+async function fetchWithTimeout(input: RequestInfo, init: RequestInit, ms = 30000) {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), ms);
   try {
