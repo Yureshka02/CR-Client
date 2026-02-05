@@ -1,31 +1,41 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const ORDERS_BASE = process.env.API_BASE_URL_ORDERS || "https://re46x5il6j.execute-api.us-east-1.amazonaws.com";
+const ORDERS_BACKEND = "http://13.221.230.193:8080";
 
-async function getBearerToken(req: Request) {
+async function getUserSub(req: Request) {
   const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET });
-  return (token as any)?.id_token || (token as any)?.access_token;
+  return token?.sub as string | undefined;
 }
 
 export async function POST(req: Request) {
-  const bearer = await getBearerToken(req);
-  if (!bearer) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-
-  const body = await req.text();
-
   try {
-    const r = await fetch(`${ORDERS_BASE}/orders/create`, {
+    const userSub = await getUserSub(req);
+    if (!userSub) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.text();
+
+    const r = await fetch(`${ORDERS_BACKEND}/orders/create`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${bearer}`,
+        "x-user-sub": userSub,
         "Content-Type": "application/json",
       },
       body,
     });
+
     const text = await r.text();
-    return new NextResponse(text, { status: r.status, headers: r.headers });
+    return new NextResponse(text, { 
+      status: r.status,
+      headers: { "Content-Type": "application/json" }
+    });
   } catch (e: any) {
-    return NextResponse.json({ message: "Error", error: String(e) }, { status: 502 });
+    console.error("Orders create error:", e);
+    return NextResponse.json(
+      { message: "Error creating order", error: String(e) }, 
+      { status: 502 }
+    );
   }
 }

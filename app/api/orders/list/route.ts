@@ -1,26 +1,38 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const ORDERS_BASE = process.env.API_BASE_URL_ORDERS || "https://re46x5il6j.execute-api.us-east-1.amazonaws.com";
+const ORDERS_BACKEND = "http://13.221.230.193:8080";
 
-async function getBearerToken(req: Request) {
+async function getUserSub(req: Request) {
   const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET });
-  return (token as any)?.id_token || (token as any)?.access_token;
+  return token?.sub as string | undefined;
 }
 
 export async function GET(req: Request) {
-  const bearer = await getBearerToken(req);
-  if (!bearer) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-
   try {
-    const r = await fetch(`${ORDERS_BASE}/orders/list`, {
+    const userSub = await getUserSub(req);
+    if (!userSub) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const r = await fetch(`${ORDERS_BACKEND}/orders/list`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${bearer}` },
+      headers: { 
+        "x-user-sub": userSub 
+      },
       cache: "no-store",
     });
+
     const text = await r.text();
-    return new NextResponse(text, { status: r.status, headers: r.headers });
+    return new NextResponse(text, { 
+      status: r.status, 
+      headers: { "Content-Type": "application/json" }
+    });
   } catch (e: any) {
-    return NextResponse.json({ message: "Error", error: String(e) }, { status: 502 });
+    console.error("Orders list error:", e);
+    return NextResponse.json(
+      { message: "Error fetching orders", error: String(e) }, 
+      { status: 502 }
+    );
   }
 }
